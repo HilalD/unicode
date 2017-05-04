@@ -28,7 +28,7 @@ convnet = [ ...
     % reluLayer();
     fullyConnectedLayer(5); % ALEX changed (was 500)
     reluLayer();
-    fullyConnectedLayer(2); % Change this to set number of output neurons
+    fullyConnectedLayer(3); % Change this to set number of output neurons
     softmaxLayer();
     classificationLayer();...
     ];

@@ -10,8 +10,8 @@ class(convnet);
 %% Train CNN
 [trainedNet, info]              = trainNetwork(trainData, trainDegreeLabels, convnet, opts);
 
-res_majority_vote_all           = zeros(2,2);
-res_windows_count_all           = zeros(2,2);
+res_majority_vote_all           = zeros(3,3);
+res_windows_count_all           = zeros(3,3);
 %% Classifiy using the trained CNN
 [YTest,YScores]                           = classify(trainedNet,testData);
 %% Compute overall classification results
@@ -23,7 +23,7 @@ if participantCodes == 1 % in case only one participant data contained in the te
     % perform majority voting on the participant (this line works only on leave one out)
     res_majority_vote_all           = round(res_windows_count_all./repmat(sum(res_windows_count_all, 2), 1, size(res_windows_count_all,2)));
 else
-    res_majority_vote_all = zeros(2,2); 
+    res_majority_vote_all = zeros(3,3); 
     % vote per participant
     for i=1:length(participantCodes)
        % take all the decisisons belongs to the corrent participant and do majority voting
@@ -45,16 +45,16 @@ res_windows_percents(isnan(res_windows_percents)) = 0;
 
 %%%%%% HILAL's CODE
 % we sum the scores of the windows instead of taking the max vote
-res_soft_voting = zeros(2,2);
-window_scores = sum(YScores)./size(YScores,1);
-winning_label_ind = window_scores==max(window_scores);
-losing_label_ind = window_scores==min(window_scores);
-winning_label = currentLabels(winning_label_ind);
-if winning_label == p_expected(1) % all the windows have the same label
-    res_soft_voting(winning_label_ind,winning_label_ind)=1;
-else
-    res_soft_voting(losing_label_ind,winning_label_ind)=1;
-end
+res_soft_voting = zeros(3,3);
+% window_scores = sum(YScores)./size(YScores,1);
+% winning_label_ind = window_scores==max(window_scores);
+% losing_label_ind = window_scores==min(window_scores);
+% winning_label = currentLabels(winning_label_ind);
+% if winning_label == p_expected(1) % all the windows have the same label
+%     res_soft_voting(winning_label_ind,winning_label_ind)=1;
+% else
+%     res_soft_voting(losing_label_ind,winning_label_ind)=1;
+% end
 %%%%%%
 % print results
 % print_table(res_windows_count_all);
