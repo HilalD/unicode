@@ -1,4 +1,9 @@
-function [convnet] = CreateCNN()
+function [convnet] = CreateCNN(numOfClasses)
+
+if ~exist('numOfClasses', 'var')
+    numOfClasses = 2;
+end
+assert (numOfClasses>1);
 
 convnet = [ ...
     imageInputLayer([1 882*1], 'Normalization', 'none'); % set input size to size of window in samples 882 is for 20ms
@@ -28,7 +33,7 @@ convnet = [ ...
     % reluLayer();
     fullyConnectedLayer(5); % ALEX changed (was 500)
     reluLayer();
-    fullyConnectedLayer(3); % Change this to set number of output neurons
+    fullyConnectedLayer(numOfClasses); % Change this to set number of output neurons
     softmaxLayer();
     classificationLayer();...
     ];
