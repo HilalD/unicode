@@ -8,7 +8,7 @@ end
 assert (numOfClasses>1);
 res_soft_voting = zeros(numOfClasses,numOfClasses);
 
-for hilalTest=1:4
+for hilalTest=1:3
 %% Build the Convolutinal Neural Network Structure
 convnet = CreateCNN(numOfClasses);
 class(convnet); 

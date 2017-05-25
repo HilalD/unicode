@@ -1,0 +1,1 @@
+"\\piano\data\DataBases\Speech\TIMIT\TIMIT-original"
