@@ -1,8 +1,8 @@
-function [] = windowing2p0timit(db)
+function [] = windowing2p0timit(db,dialectName)
 %% window and transform all wav files in directory
 % Parameters
-    millisecs = 20; %size of window in millisecs
-    overlapPercentage = 0.5; % an overlap of .9 would have 90% overlap between windows, for example
+    millisecs = 30; %size of window in millisecs
+    overlapPercentage = 0.3; % an overlap of .9 would have 90% overlap between windows, for example
     winPath = '/Users/hilldi/Documents/MATLAB/parkinsons project/hilalWindowing'; % folder for windows
     
 %% load directory and files with .wav extension
@@ -19,7 +19,7 @@ function [] = windowing2p0timit(db)
 % wavDS = fileDatastore(filepath,'ReadFcn',@audioread);
 %data1 = read(wavDS);
 %data1 = sum(data1,2) ./ 2;
-[wavs,freqSamples,metas] = query(db,'usage','train','dialect', 'dr3');
+[wavs,freqSamples,metas] = query(db,'dialect', dialectName);
 for i=1:length(wavs)
     y = wavs{i};
     Fs = freqSamples;
@@ -43,7 +43,7 @@ for i=1:length(wavs)
     
     %% cut the file into windows
 %     millisecs = 20; %size of window in millisecs
-    winSize = round((Fs/1000)*millisecs); %size of window in samples
+    winSize = 1323;%round((Fs/1000)*millisecs); %size of window in samples
 %     overlapPercentage = 0.90;
     
     loc = 1;
