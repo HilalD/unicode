@@ -1,14 +1,14 @@
-function [] = windowing2p0(filepath, windowpath, labelpath, millisecs, overlapPercentage)
+function [] = windowing2p0(shouldFilterSilence)
 %% window and transform all wav files in directory
 % Parameters
-    millisecs = 20; %size of window in millisecs
-    overlapPercentage = 0.5; % an overlap of .9 would have 90% overlap between windows, for example
-    winPath = '/home/alex/PDM-Master/windowed20ms'; % folder for windows
+    millisecs = 30; %size of window in millisecs
+    overlapPercentage = 0.3; % an overlap of .9 would have 90% overlap between windows, for example
+    winPath = '/home/hdiab/PDM-Master/windowed30ms-03-complexsilencefiltered'; % folder for windows
     
 %% load directory and files with .wav extension
-filepath = '/home/alex/PDM-Master/cut';
+filepath = '/home/hdiab/PDM-Master/cut';
 files = dir(fullfile(filepath,'*.wav'));
-labelpath = '/home/alex/PDM-Master/R01 Subject characteristics.xls';
+labelpath = '/home/hdiab/PDM-Master/R01 Subject characteristics.xls';
 %% load xls file which contains label information
 filename = labelpath;
 xlRange = 'A6:L57';
@@ -20,8 +20,13 @@ wavDS = fileDatastore(filepath,'ReadFcn',@audioread);
 %data1 = read(wavDS);
 %data1 = sum(data1,2) ./ 2;
 for i=1:length(wavDS.Files)
+    str = sprintf('%d/%d',i,length(wavDS.Files));
+    disp(str);
     %[y,Fs] = audioread(fullfile(filepath,files(i).name));
     [y, Fs] = audioread(wavDS.Files{i});
+    if exist('shouldFilterSilence', 'var') && shouldFilterSilence
+        y = complexSilenceFilter(y, Fs);
+    end
     % average out channels if not mono
     [~, n] = size(y);
     if n > 1
@@ -87,4 +92,18 @@ for i=1:length(wavDS.Files)
         ind = ind + 1;
     end
 end
+
+end
+
+function yEdited = filterSilenceSimple(y,fs)
+% Find the envelope by taking a moving max operation, imdilate.
+envelope = imdilate(abs(y), true(1501, 1));
+quietParts = envelope(:,1) < 0.01 & envelope(:,2) < 0.01; % Or whatever value you want.
+% Cut out quiet parts and plot.
+yEdited = y; % Initialize
+yEdited(quietParts,:) = [];
+end
+
+function y = complexSilenceFilter(y,fs)
+    y = detectVoiced(y,fs);
 end

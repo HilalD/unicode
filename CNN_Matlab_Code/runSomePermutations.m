@@ -7,7 +7,7 @@ opts        = trainingOptions('sgdm', 'InitialLearnRate', 0.1, 'MiniBatchSize', 
 % only relevant if NOT using leave-one-out
 trainingSetPercentage = 0.85; 
 
-rootFolder = fullfile('/home/alex/PDM-Master','windowed20ms'); % set sample folder
+rootFolder = fullfile('/home/hdiab/PDM-Master','windowed20ms'); % set sample folder
 
 %% Categories
 st.S0   = [7 10 13 14 17 42 50 56 59];

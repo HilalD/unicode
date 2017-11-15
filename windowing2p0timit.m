@@ -3,7 +3,7 @@ function [] = windowing2p0timit(db,dialectName)
 % Parameters
     millisecs = 30; %size of window in millisecs
     overlapPercentage = 0.3; % an overlap of .9 would have 90% overlap between windows, for example
-    winPath = '/Users/hilldi/Documents/MATLAB/parkinsons project/hilalWindowing'; % folder for windows
+    winPath = '/Users/hilldi/Documents/MATLAB/parkinsons project/hilalWindowingWithoutSilence'; % folder for windows
     
 %% load directory and files with .wav extension
 % filepath = '/home/alex/PDM-Master/cut';
@@ -24,6 +24,7 @@ for i=1:length(wavs)
     y = wavs{i};
     Fs = freqSamples;
     % average out channels if not mono
+    y = complexSilenceFilter(y, Fs);
     [~, n] = size(y);
     if n > 1
         y = sum(y,2) ./ n;
@@ -72,4 +73,9 @@ for i=1:length(wavs)
         ind = ind + 1;
     end
 end
+end
+
+
+function y = complexSilenceFilter(y,fs)
+    y = detectVoiced(y,fs);
 end

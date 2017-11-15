@@ -1,0 +1,117 @@
+function [] = preceptry()
+
+rootFolder = fullfile('C:\Users\user\Documents\MATLAB\PDM-master\','transformedImsNorm');
+categories = {'0', '3'};
+
+display 'Loading dataset...';
+imds = imageDatastore(fullfile(rootFolder, categories),...
+    'IncludeSubfolders', true,...
+    'LabelSource','foldernames');
+
+display 'Counting labels...';
+tbl = countEachLabel(imds);
+
+display 'Equalizing labels...';
+minSetCount = min(tbl{:,2}); % determine the smallest amount of images in a category
+
+% Use splitEachLabel method to trim the set.
+imds = splitEachLabel(imds, int32(minSetCount * 0.20), 'randomized');
+
+[data, labels, labels2] = loadAlltoMem(imds);
+
+% Randomize samples
+[imds] = myRandomize(imds);
+
+Tt = cell(1,1);
+
+X = read(imds);
+X = reshape(X,1,[]);
+T = imds.Labels(1);
+%X = con2seq(X);
+switch T
+    case '0'
+        Tt{1} = 0;
+    otherwise
+        Tt{1} = 1;
+end
+
+net = perceptron;
+net = configure(net,X',Tt);
+
+epochNum    = 10;
+cor         = zeros(1, epochNum); 
+for ep = 1:epochNum
+    disp(['Epoch Num: ' num2str(ep) '...']);
+    % train
+    tic
+    for i=2:length(imds.Files)
+        X = read(imds);
+        X = double(X);
+        X = reshape(X,1,[]);
+        T = imds.Labels(i);
+        %X = con2seq(X);
+        switch T
+            case '0'
+                Tt{1} = 0;
+            otherwise
+                Tt{1} = 1;
+        end
+        net = adapt(net,X',Tt);
+    end
+    toc
+    % test
+    reset(imds); % reset the dataset index track 
+    [cor(ep)] = computeSuccess(imds, net); 
+    figure(1); plot(cor); disp(cor);
+    % randomize the data before the next epoch
+    [imds] = myRandomize(imds); 
+end
+
+function [cor] = computeSuccess(imds, net)
+cor = 0; wro = 0;
+for i=1:length(imds.Files)
+    x = read(imds);
+    x = double(x);
+    x = reshape(x,1,[]);
+    t = imds.Labels(i);
+    switch t
+        case '0'
+            t = 0;
+        otherwise
+            t = 1;
+    end
+    y = net(x');
+    if t == y
+        cor = cor+1;
+    else
+        wro = wro+1;
+    end
+end
+
+cor = cor/(cor+wro); % correct percentage: 47.86%
+wro = wro/(cor+wro); % wrong percentage: 52.14%
+
+
+function [imds] = myRandomize(imds)
+% permute the data (before training the net)
+rndprm = randperm(length(imds.Files));
+labels = imds.Labels;
+labels = labels(rndprm);
+imds.Files = imds.Files(rndprm);
+imds.Labels = labels;
+
+function [res, labels, labels2] = loadAlltoMem(imds)
+% Just load everything into the memory... 
+X = read(imds);
+X = X(:)';
+res = zeros(length(imds.Files), length(X)); 
+res(1,:) = X; 
+for i=2:length(imds.Files)
+    X = read(imds); 
+    X = X(:,1:25:end);
+    res(i,:) = X(:)';
+end
+[~,~,labels] = unique(imds.Labels);
+labels2 = zeros(length(labels), 2); 
+labels2(labels==1,1) = 1;
+labels2(labels==2,2) = 1;
